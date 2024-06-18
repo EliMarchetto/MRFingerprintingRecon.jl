@@ -58,7 +58,10 @@ end
 
 # Create repeating pattern
 data2 = repeat(deepcopy(data), outer = [1, 1, 1, Nrep])
+data2 = reshape(permutedims(data2, (1,2,4,3)),Nr, :, Ncoil)
 
+data2 = [data2[:,it,:] for it ∈ axes(data2,2)]
+data = [data[:,it,:] for it=1:Nt]
 
 ## #####################################
 # Test Calibration of GROG kernel
@@ -68,7 +71,6 @@ lnG = MRFingerprintingRecon.grog_calib(data, trj, Nr)
 lnG2 = MRFingerprintingRecon.grog_calib(data2, trj, Nr)
 
 @test lnG ≈ lnG2 rtol = 1e-6
-
 
 ## #####################################
 # Test Gridding with GROG kernel
@@ -82,15 +84,16 @@ MRFingerprintingRecon.grog_gridding!(data, trj1, lnG, Nr, (Nx,Nx))
 MRFingerprintingRecon.grog_gridding!(data2, trj, lnG2, Nr, (Nx,Nx))
 
 # Compare gridding with and without repeating pattern
-@test data ≈ data2[:,:,:,1] rtol = 1e-6
-@test data ≈ data2[:,:,:,3] rtol = 1e-6
-
+for it = 1:Nt
+    @test data[it] ≈ data2[it][:,:] rtol = 1e-6
+    @test data[it] ≈ data2[it + 200][:,:] rtol = 1e-6
+end
 
 ## #####################################
 # Test Gridded Reconstruction with and without Repeating Pattern
 ########################################
 
-U = ones(ComplexF32, size(data)[2], 1)
+U = ones(ComplexF32, length(data), 1)
 
 # Reconstruction without repeating pattern
 A_grog = FFTNormalOp((Nx,Nx), trj, U; cmaps)

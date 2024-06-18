@@ -57,15 +57,17 @@ U,_,_ = svd(U)
 
 ## simulate data
 data = Array{Complex{T}}(undef, size(trj[1], 2), Nt, Ncoil)
+data = [data[:,it,:] for it = 1:Nt]
+
 nfftplan = plan_nfft(trj[1], (Nx,Nx))
 xcoil = copy(x)
 for icoil ∈ 1:Ncoil
     xcoil .= x
     xcoil .*= cmaps[icoil]
-    for it ∈ axes(data,2)
+    for it ∈ axes(data,1)
         nodes!(nfftplan, trj[it])
         xt = reshape(reshape(xcoil, :, Nc) * U[it,:], Nx, Nx)
-        @views mul!(data[:,it,icoil], nfftplan, xt)
+        @views mul!(data[it][:,icoil], nfftplan, xt)
     end
 end
 

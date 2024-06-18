@@ -45,7 +45,6 @@ end
 
 cmaps = [cmaps[:,:,ic] for ic=1:Ncoil]
 
-
 ## Simulate data
 data = Array{Complex{T}}(undef, size(trj[1], 2), Nt, Ncoil)
 nfftplan = plan_nfft(trj[1], (Nx,Nx))
@@ -59,12 +58,13 @@ for icoil ∈ 1:Ncoil
     end
 end
 
+data = [data[:,it,:] for it=1:Nt]
 
 ## Test GROG kernels for some spokes in golden ratio based trajectory
 
 lnG = MRFingerprintingRecon.grog_calib(data, trj, Nr)
 
-data_r = reshape(data, Nr, :, Ncoil)
+data_r = permutedims(combinedimsview(data),(1,3,2))
 
 trj_r = reshape(combinedimsview(trj), 2, Nr, :)
 

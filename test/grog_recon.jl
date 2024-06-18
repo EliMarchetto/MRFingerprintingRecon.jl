@@ -77,6 +77,8 @@ for icoil ∈ 1:Ncoil
     end
 end
 
+data = [data[:,it,:] for it=1:Nt]
+
 ## Ground truth reconstruction by cropping k-space
 xc = fftshift(fft(x, 1:2), 1:2)
 for i ∈ CartesianIndices(xc)

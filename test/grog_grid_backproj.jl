@@ -77,6 +77,7 @@ for it ∈ eachindex(trj)
     trj[it] = ceil.(Int, trj[it])
 end
 
+data = [data[:,it,:] for it=1:Nt]
 reco = calculateBackProjection_gridded(data, trj, U, cmaps)
 
 reco = dropdims(reco, dims=3)
